@@ -15,13 +15,6 @@
 #include <math.h>
 #include <netdb.h>
 
-typedef struct ip_iterator {
-    unsigned int netmask;
-    int bitcount;
-    long long num_total;
-    long long num_left;
-    int current_ip[4];
-} ip_iterator;
 
 int tesla_dns_lookup_host(const char *hostname, char *ipaddr, size_t ipaddr_size) {
     struct sockaddr_in sa;
@@ -69,23 +62,4 @@ int tesla_get_rand_ipv4(char *ip_addr, size_t ipaddr_sz) {
     fclose(fp);
     snprintf(ip_addr, ipaddr_sz, "%d.%d.%d.%d", ip[0], ip[1], ip[2], ip[3]);
     return 0;
-}
-
-
-ip_iterator *init_ip_iterator(char *addr_range) { // in the format a.b.c.d/n
-    ip_iterator *it;
-    if (!(it = malloc(sizeof(ip_iterator)))) {
-        fprintf(stderr, "[!] Malloc failure\n");
-        return NULL;
-    }
-    int given_ip[4];
-    if (sscanf(addr_range, "%d.%d%d.%d/%d", &given_ip[0], &given_ip[1], &given_ip[2], &given_ip[3], &it->bitcount) != 5) {
-        fprintf(stderr, "[!] %s is an invalid address range\n", addr_range);
-        free(it);
-        return NULL;
-    }
-    it->netmask = (0xffffffff >> (32 - it->bitcount)) << (32 - it->bitcount);
-    it->num_total = pow(2, (32 - it->bitcount));
-    it->num_left = it->num_total;
-    return NULL;
 }
