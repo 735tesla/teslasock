@@ -20,7 +20,7 @@ tesla_udpsocket *tesla_udpsocket_init(char *host, int port, int timeout) {
 
     tesla_udpsocket *udpsocket;
     if (!(udpsocket = malloc(sizeof(tesla_udpsocket)))) {
-        fprintf(stderr, "[!] Malloc failure\n");
+        fprintf(stderr, "[!] Malloc failure: %s\n", strerror(errno));
         return NULL;
     }
     memset(udpsocket, 0, sizeof(tesla_udpsocket));
@@ -34,12 +34,12 @@ tesla_udpsocket *tesla_udpsocket_init(char *host, int port, int timeout) {
     udpsocket->server_addr.sin_family = AF_INET;
     udpsocket->server_addr.sin_port = htons(port);
     if (inet_pton(AF_INET, udpsocket->addr  , &udpsocket->server_addr.sin_addr) != 1) {
-        fprintf(stderr, "[!] Invalid IP address %s\n", udpsocket->addr);
+        fprintf(stderr, "[!] Invalid IP address %s: %s\n", udpsocket->addr, strerror(errno));
         free(udpsocket);
         return NULL;
     }
     if ((udpsocket->sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
-        fprintf(stderr, "[!] Failed to build socket\n");
+        fprintf(stderr, "[!] Failed to build socket: %s\n", strerror(errno));
         free(udpsocket);
         return NULL;
     }

@@ -21,7 +21,7 @@
 tesla_tcpsocket* tesla_tcpsocket_init(char *host, int port, unsigned int connect_timeout) {
     tesla_tcpsocket *tcpsocket;
     if (!(tcpsocket = malloc(sizeof(tesla_tcpsocket)))) {
-        fprintf(stderr, "[!] Malloc failure\n");
+        fprintf(stderr, "[!] Malloc failure: %s\n", strerror(errno));
         return NULL;
     }
     memset(tcpsocket, 0, sizeof(tesla_tcpsocket));
@@ -35,12 +35,12 @@ tesla_tcpsocket* tesla_tcpsocket_init(char *host, int port, unsigned int connect
     tcpsocket->server_addr.sin_family = AF_INET;
     tcpsocket->server_addr.sin_port = htons(port);
     if (inet_pton(AF_INET, tcpsocket->addr  , &tcpsocket->server_addr.sin_addr) != 1) {
-        fprintf(stderr, "[!] Invalid IP address %s\n", tcpsocket->addr);
+        fprintf(stderr, "[!] Invalid IP address %s: %s\n", tcpsocket->addr, strerror(errno));
         free(tcpsocket);
         return NULL;
     }
     if ((tcpsocket->sockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
-        fprintf(stderr, "[!] Failed to build socket\n");
+        fprintf(stderr, "[!] Failed to build socket: %s\n", strerror(errno));
         free(tcpsocket);
         return NULL;
     }
@@ -100,7 +100,7 @@ int tesla_tcpsocket_connect(tesla_tcpsocket *tcpsocket) {
         int success;
         success = connect(tcpsocket->sockfd, (struct sockaddr*)&tcpsocket->server_addr, sizeof(struct sockaddr_in));
         if (success != 0 && !tcpsocket->blocking) {
-            fprintf(stderr, "[!] %d %s\n", success, strerror(errno));
+            fprintf(stderr, "[!] Connect() failed: %s\n", strerror(errno));
             return 1;
         }
         if (tcpsocket->blocking) {
