@@ -23,5 +23,8 @@ typedef struct tesla_udpsocket {
 } tesla_udpsocket;
 
 tesla_udpsocket *tesla_udpsocket_init   (char *host, int port, int timeout);
+ssize_t tesla_udpsock_send(tesla_udpsocket *udpsock, void *send_buffer, size_t len);
+ssize_t tesla_udpsock_recv(tesla_udpsocket *udpsock, void *dest_buffer, size_t len);
+void tesla_udpsock_destroy(tesla_udpsocket *udpsocket);
 
 #endif /* defined(__tesla__tesla_udpsocket__) */
