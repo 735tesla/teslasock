@@ -6,7 +6,7 @@
 //  Copyright (c) 2015 Entropy. All rights reserved.
 //
 
-#include "tesla_udpsocket.h"
+#include "tesla_udpsock.h"
 #include "tesla_netutils.h"
 #include <arpa/inet.h>
 #include <stdio.h>

@@ -6,7 +6,7 @@
 //  Copyright (c) 2015 Entropy. All rights reserved.
 //
 
-#include "tesla_tcpsocket.h"
+#include "tesla_tcpsock.h"
 #include "tesla_netutils.h"
 #include <sys/socket.h>
 #include <arpa/inet.h>
