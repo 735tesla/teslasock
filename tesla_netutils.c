@@ -6,6 +6,7 @@
 //  Copyright (c) 2015 Entropy. All rights reserved.
 //
 
+
 #include "tesla_netutils.h"
 #include <arpa/inet.h>
 #include <netdb.h>
@@ -46,7 +47,10 @@ int tesla_reverse_dns_lookup_host(const char *ipaddr, char *hostname, size_t hos
     return 0;
 }
 
-int tesla_get_rand_ipv4(char *ip_addr, size_t ipaddr_sz) {
+int tesla_get_rand_ipv4(char *ip_addr, size_t ipaddr_sz, char **blacklist, int iterations) {
+    memset(ip_addr, 0, ipaddr_sz);
+    if (iterations-- == 0)
+        return 1;
     int ip[4];
     FILE *fp = NULL;
     if ((fp = fopen("/dev/urandom", "rb")) == NULL)
@@ -61,5 +65,11 @@ int tesla_get_rand_ipv4(char *ip_addr, size_t ipaddr_sz) {
     }
     fclose(fp);
     snprintf(ip_addr, ipaddr_sz, "%d.%d.%d.%d", ip[0], ip[1], ip[2], ip[3]);
+    if (blacklist) {
+        char *bad_ip = NULL;
+        while ((bad_ip = *blacklist++) != NULL)
+            if (strcmp(bad_ip, ip_addr) != 0)
+                return tesla_get_rand_ipv4(ip_addr, ipaddr_sz, blacklist, iterations);
+    }
     return 0;
 }
