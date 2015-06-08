@@ -77,8 +77,8 @@ int tesla_get_rand_ipv4(char *ip_addr, size_t ipaddr_sz, char **blacklist, int i
 int straddr(const struct sockaddr *addr, void *restrict buf, size_t buf_size) {
 	memset(buf, 0, buf_size);
 	if (addr->sa_family == AF_INET6)
-		return (inet_ntop(addr->sa_family, &((struct sockaddr_in6*)addr)->sin6_addr, str, buf_size) == NULL) ? 1 : 0;
+		return (inet_ntop(addr->sa_family, &((struct sockaddr_in6*)addr)->sin6_addr, buf, (socklen_t)buf_size) == NULL) ? 1 : 0;
 	else if (addr->sa_family == AF_INET)
-		return (inet_ntop(addr->sa_family, &((struct sockaddr_in*)addr)->sin_addr.s_addr, str, buf_size) == NULL) ? 1 : 0;
+		return (inet_ntop(addr->sa_family, &((struct sockaddr_in*)addr)->sin_addr.s_addr, buf, (socklen_t)buf_size) == NULL) ? 1 : 0;
 	return 1;
 }
