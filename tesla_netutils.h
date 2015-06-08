@@ -70,4 +70,15 @@ int tesla_reverse_dns_lookup_host(const char *ipaddr, char *hostname, size_t hos
  */
 int tesla_get_rand_ipv4(char *ip_addr, size_t ipaddr_sz, char **blacklist, int iterations);
 
+/*
+Converts a sockaddr to a human readable address
+ addr:
+  A pointer to a sockaddr struct
+ buf:
+  The buffer in which to store the output
+ buf_size:
+  The size of buf
+ returns 0 on success and 1 on failure
+*/
+int straddr(const struct sockaddr *addr, void *restrict buf, size_t buf_size);
 #endif /* defined(__tesla__tesla_netutils__) */
