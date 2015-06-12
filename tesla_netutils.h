@@ -16,6 +16,7 @@
 #ifndef __tesla__tesla_netutils__
 #define __tesla__tesla_netutils__
 #include <stddef.h>
+#include <sys/socket.h>
 
 
 /*

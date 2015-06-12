@@ -15,48 +15,31 @@
 #include <string.h>
 #include <errno.h>
 
-
-tesla_udpsocket *tesla_udpsocket_init(char *host, int port, int timeout) {
-
-    tesla_udpsocket *udpsocket;
-    if (!(udpsocket = malloc(sizeof(tesla_udpsocket)))) {
-        fprintf(stderr, "[!] Malloc failure: %s\n", strerror(errno));
-        return NULL;
-    }
-    memset(udpsocket, 0, sizeof(tesla_udpsocket));
-    udpsocket->port = port;
-    bzero(udpsocket->addr, sizeof(udpsocket->addr));
-    if ((tesla_dns_lookup_host(host, udpsocket->addr, sizeof(udpsocket->addr)))) {
-        fprintf(stderr, "[!] Failed to lookup hostname %s\n", host);
-        free(udpsocket);
-        return NULL;
-    }
-    udpsocket->server_addr.sin_family = AF_INET;
-    udpsocket->server_addr.sin_port = htons(port);
-    if (inet_pton(AF_INET, udpsocket->addr  , &udpsocket->server_addr.sin_addr) != 1) {
-        fprintf(stderr, "[!] Invalid IP address %s: %s\n", udpsocket->addr, strerror(errno));
-        free(udpsocket);
-        return NULL;
-    }
-    if ((udpsocket->sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
-        fprintf(stderr, "[!] Failed to build socket: %s\n", strerror(errno));
-        free(udpsocket);
-        return NULL;
-    }
-    return udpsocket;
+tesla_udpsocket *tesla_udpsocket_init(const char *host, int port) {
+    return tesla_socket_init(host, port, SOCK_DGRAM);
 }
 
-ssize_t tesla_udpsock_send(tesla_udpsocket *udpsock, void *send_buffer, size_t len) {
-    socklen_t sz = sizeof(udpsock->server_addr);
-    return sendto(udpsock->sockfd, send_buffer, len, 0, (struct sockaddr*)&udpsock->server_addr, sz);
+ssize_t tesla_udpsocket_send(tesla_socket *sock, char *data_buffer, size_t data_len) {
+    if (sock->proto != SOCK_DGRAM) {
+        fprintf(stderr, "[!] tesla_udpsocket_send cannot be used on tcp socket at %p\n", sock);
+        return -1;
+    }
+    ssize_t ret = sendto(sock->sockfd, data_buffer, data_len, 0, (struct sockaddr*)&sock->server_addr, (socklen_t)sizeof(struct sockaddr));
+    if (ret < 0) {
+        fprintf(stderr, "[!] Send failed on tesla_socket at %p: %s\n", sock, strerror(errno));
+    }
+    return ret;
 }
 
-ssize_t tesla_udpsock_recv(tesla_udpsocket *udpsock, void *dest_buffer, size_t len) {
-    socklen_t sz = sizeof(udpsock->server_addr);
-    return recvfrom(udpsock->sockfd, dest_buffer, len, 0, (struct sockaddr*)&udpsock->server_addr, &sz);
-}
-
-void tesla_udpsock_destroy(tesla_udpsocket *udpsocket) {
-    close(udpsocket->sockfd);
-    free(udpsocket);
+ssize_t tesla_udpsocket_recv(tesla_socket *sock, void *dest_buffer, size_t read_len) {
+    if (sock->proto != SOCK_DGRAM) {
+        fprintf(stderr, "[!] tesla_udpsocket_send cannot be used on tcp socket at %p\n", sock);
+        return -1;
+    }
+    socklen_t len = sizeof(struct sockaddr);
+    ssize_t ret = recvfrom(sock->sockfd, dest_buffer, read_len, 0, (struct sockaddr*)&sock->server_addr, &len);
+    if (ret < 0) {
+        fprintf(stderr, "[!] Recv failed on tesla_udpsocket at %p: %s\n", sock, strerror(errno));
+    }
+    return ret;
 }
