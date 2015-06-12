@@ -1,5 +1,5 @@
 //
-//  tesla_tcpsocket.c
+//  tesla_tcpsock.c
 //  tesla
 //
 //  Created by Henry Pitcairn on 2/12/15.
@@ -18,17 +18,17 @@
 #include <fcntl.h>
 #include <sys/select.h>
 
-tesla_socket* tesla_tcpsocket_init(char *host, int port) {
-    return tesla_socket_init(host, port, SOCK_STREAM);
+tesla_sock* tesla_tcpsock_init(char *host, int port) {
+    return tesla_sock_init(host, port, SOCK_STREAM);
 }
 
-int tesla_tcpsocket_set_connect_timeout(tesla_socket *sock, unsigned int connect_timeout) {
+int tesla_tcpsock_set_connect_timeout(tesla_sock *sock, unsigned int connect_timeout) {
     if (sock->proto == SOCK_DGRAM) {
-        fprintf(stderr, "[!] Cannot set timeout on tesla_socket at %p: it is a datagram socket and is connectionless\n", sock);
+        fprintf(stderr, "[!] Cannot set timeout on tesla_sock at %p: it is a datagram sock and is connectionless\n", sock);
         return 1;
     }
     if (sock->connected) {
-        fprintf(stderr, "[!] Cannot set timeout on tesla_socket at %p: it has already been connected \n", sock);
+        fprintf(stderr, "[!] Cannot set timeout on tesla_sock at %p: it has already been connected \n", sock);
         return 1;
     }
     sock->connect_timeout = connect_timeout;
@@ -42,9 +42,9 @@ int tesla_tcpsocket_set_connect_timeout(tesla_socket *sock, unsigned int connect
     return 0;
 }
 
-int tesla_tcpsocket_set_send_timeout(tesla_socket *sock, unsigned int timeout_secs) {
-    fprintf(stderr, "[!] A send timeout is being set on a tesla_socket at %p, but it UDP send operations are non-blocking\n", sock);
-    if (tesla_tcpsocket_assert_unconnected(sock)) {
+int tesla_tcpsock_set_send_timeout(tesla_sock *sock, unsigned int timeout_secs) {
+    fprintf(stderr, "[!] A send timeout is being set on a tesla_sock at %p, but it UDP send operations are non-blocking\n", sock);
+    if (tesla_tcpsock_assert_unconnected(sock)) {
         struct timeval timeout;
         timeout.tv_sec = timeout_secs;
         timeout.tv_usec = 0;
@@ -55,54 +55,54 @@ int tesla_tcpsocket_set_send_timeout(tesla_socket *sock, unsigned int timeout_se
     return 1;
 }
 
-int tesla_tcpsocket_assert_connected(tesla_socket *sock) {
+int tesla_tcpsock_assert_connected(tesla_sock *sock) {
     if (!sock->connected) {
-        fprintf(stderr, "[!] tesla_socket at %p is not connected\n", sock);
+        fprintf(stderr, "[!] tesla_sock at %p is not connected\n", sock);
         return 0;
     }
     return 1;
 }
 
-int tesla_tcpsocket_assert_unconnected(tesla_socket *sock) {
+int tesla_tcpsock_assert_unconnected(tesla_sock *sock) {
     if (sock->connected) {
-        fprintf(stderr, "[!] tesla_socket at %p is already connected\n", sock);
+        fprintf(stderr, "[!] tesla_sock at %p is already connected\n", sock);
         return 0;
     }
     return 1;
 }
 
-ssize_t tesla_tcpsocket_send(tesla_socket *sock, char *data_buffer, size_t data_len) {
+ssize_t tesla_tcpsock_send(tesla_sock *sock, char *data_buffer, size_t data_len) {
     if (sock->proto != SOCK_STREAM) {
-        fprintf(stderr, "[!] tesla_tcpsocket_send cannot be used on udp socket at %p\n", sock);
+        fprintf(stderr, "[!] tesla_tcpsock_send cannot be used on udp sock at %p\n", sock);
         return -1;
     }
-    if (tesla_tcpsocket_assert_connected(sock)) {
+    if (tesla_tcpsock_assert_connected(sock)) {
         ssize_t ret;
         ret = send(sock->sockfd, data_buffer, data_len, 0);
         if (ret < 0)
-            fprintf(stderr, "[!] Send failed on tesla_socket at %p: %s\n", sock, strerror(errno));
+            fprintf(stderr, "[!] Send failed on tesla_sock at %p: %s\n", sock, strerror(errno));
         return ret;
     }
     return -1;
 }
 
-ssize_t tesla_tcpsocket_recv(tesla_socket *sock, void *dest_buffer, size_t read_len) {
+ssize_t tesla_tcpsock_recv(tesla_sock *sock, void *dest_buffer, size_t read_len) {
     if (sock->proto != SOCK_STREAM) {
-        fprintf(stderr, "[!] tesla_tcpsocket_recv cannot be used on udp socket at %p\n", sock);
+        fprintf(stderr, "[!] tesla_tcpsock_recv cannot be used on udp sock at %p\n", sock);
         return -1;
     }
-    if (tesla_tcpsocket_assert_connected(sock)) {
+    if (tesla_tcpsock_assert_connected(sock)) {
         return recv(sock->sockfd, dest_buffer, read_len, 0);
     }
     return 0;
 }
 
-int tesla_tcpsocket_connect(tesla_socket *sock) {
+int tesla_tcpsock_connect(tesla_sock *sock) {
     if (sock->proto == SOCK_DGRAM) {
-        fprintf(stderr, "[!] tesla_socket_connect cannot be used on udp socket at %p\n", sock);
+        fprintf(stderr, "[!] tesla_sock_connect cannot be used on udp sock at %p\n", sock);
         return -1;
     }
-    if (tesla_tcpsocket_assert_unconnected(sock)) {
+    if (tesla_tcpsock_assert_unconnected(sock)) {
         int success;
         success = connect(sock->sockfd, (struct sockaddr*)&sock->server_addr, sizeof(struct sockaddr_in));
         if (success != 0 && sock->blocking) {
@@ -114,7 +114,7 @@ int tesla_tcpsocket_connect(tesla_socket *sock) {
             tv.tv_sec = sock->connect_timeout;
             tv.tv_usec = 0;
             if (select(sock->sockfd+1, NULL, &sock->s_fdset, NULL, &tv) < 1) {
-                fprintf(stderr, "[!] tesla_socket at %p timed out waiting %d secs to connect to %s:%d\n", sock, sock->connect_timeout, sock->addr, sock->port);
+                fprintf(stderr, "[!] tesla_sock at %p timed out waiting %d secs to connect to %s:%d\n", sock, sock->connect_timeout, sock->addr, sock->port);
                 return 1;
             }
         }

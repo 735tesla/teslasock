@@ -1,32 +1,32 @@
 //
-//  tesla_udpsocket.h
+//  tesla_udpsock.h
 //  tesla
 //
 //  Created by Henry Pitcairn on 2/12/15.
 //  Copyright (c) 2015 Entropy. All rights reserved.
 //
 
-#ifndef __tesla__tesla_udpsocket__
-#define __tesla__tesla_udpsocket__
+#ifndef __tesla__tesla_udpsock__
+#define __tesla__tesla_udpsock__
 
 #include "tesla_sock.h"
 
-#define tesla_udpsocket tesla_socket
-#define tesla_udpsocket_set_recv_timeout tesla_socket_set_recv_timeout
-#define tesla_udpsocket_close tesla_socket_close
-#define tesla_udpsocket_destroy tesla_socket_destroy
-#define tesla_udpsocket_close_and_destroy tesla_socket_close_and_destroy
+#define tesla_udpsock tesla_sock
+#define tesla_udpsock_set_recv_timeout tesla_sock_set_recv_timeout
+#define tesla_udpsock_close tesla_sock_close
+#define tesla_udpsock_destroy tesla_sock_destroy
+#define tesla_udpsock_close_and_destroy tesla_sock_close_and_destroy
 
-tesla_socket* tesla_udpsocket_init(const char *host, int port);
+tesla_sock* tesla_udpsock_init(const char *host, int port);
 
-ssize_t tesla_udpsocket_send(tesla_socket *socket, char *data_buffer, size_t data_len);
+ssize_t tesla_udpsock_send(tesla_sock *sock, char *data_buffer, size_t data_len);
 
-ssize_t tesla_udpsocket_recv(tesla_socket *socket, void *dest_buffer, size_t read_len);
+ssize_t tesla_udpsock_recv(tesla_sock *sock, void *dest_buffer, size_t read_len);
 
-#ifdef __tesla_udpsocket__shortnames__
-    #define tesla_socket_send tesla_udpsocket_send
-    #define tesla_socket_recv tesla_udpsocket_recv
+#ifdef __tesla_udpsock__shortnames__
+    #define tesla_sock_send tesla_udpsock_send
+    #define tesla_sock_recv tesla_udpsock_recv
 #endif
 
 
-#endif /* defined(__tesla__tesla_udpsocket__) */
+#endif /* defined(__tesla__tesla_udpsock__) */
